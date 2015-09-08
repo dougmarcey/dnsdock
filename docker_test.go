@@ -100,3 +100,25 @@ func TestOverrideFromEnv(t *testing.T) {
 	}
 
 }
+
+func TestOverrideFromDockerComposeName(t *testing.T) {
+	inputs := []struct{
+		input, name, image string
+	}{
+		{"foo_bar_1", "bar", "foo"},
+		{"foo_bar_2", "bar2", "foo"},
+		{"foobar", "foobar", ""},
+	}
+	getService := func(name string) *Service {
+		service := NewService()
+		service.Name = name
+		return service
+	}
+	for _, input := range inputs {
+		t.Log(input.input)
+		s := getService(input.input)
+		if actual := overrideFromDockerComposeName(s); actual.Name != input.name || actual.Image != input.image {
+			t.Error(input.input, "Expected:", input.name, input.image, "Got:", actual.Name, actual.Image)
+		}
+	}
+}

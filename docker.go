@@ -73,7 +73,9 @@ func (d *DockerManager) getService(id string) (*Service, error) {
 	}
 	service.Name = cleanContainerName(inspect.Name)
 	service.Ip = net.ParseIP(inspect.NetworkSettings.IPAddress)
-
+	if d.config.dockerCompose == true {
+		service = overrideFromDockerComposeName(service)
+	}
 	service = overrideFromEnv(service, splitEnv(inspect.Config.Env))
 	if service == nil {
 		return nil, errors.New("Skipping " + id)
@@ -180,6 +182,20 @@ func overrideFromEnv(in *Service, env map[string]string) (out *Service) {
 
 	if len(region) > 0 {
 		in.Image = in.Image + "." + region
+	}
+	out = in
+	return
+}
+
+func overrideFromDockerComposeName(in *Service) (out *Service) {
+	re := regexp.MustCompile(`(\w+)_(\w+)_(\d+)`)
+	if re.MatchString(in.Name) == true {
+		res := re.FindStringSubmatch(in.Name)
+		in.Image = res[1]
+		in.Name = res[2]
+		if res[3] != "1" {
+			in.Name = strings.Join(res[2:4], "")
+		}
 	}
 	out = in
 	return
