@@ -34,6 +34,8 @@ type Config struct {
 	verbose    bool
 	httpAddr   string
 	ttl        int
+	dockerCompose bool
+	namedDomain bool
 }
 
 func NewConfig() *Config {

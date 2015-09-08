@@ -29,6 +29,8 @@ func main() {
 	flag.StringVar(&config.tlsKey, "tlskey", config.tlsKey, "Path to client certificate private key")
 	flag.BoolVar(&config.verbose, "verbose", true, "Verbose output")
 	flag.IntVar(&config.ttl, "ttl", config.ttl, "TTL for matched requests")
+	flag.BoolVar(&config.dockerCompose, "dockerCompose", false, "Support docker-compose style names (project_name_# = name#.project.domain)")
+	flag.BoolVar(&config.namedDomain, "namedDomain", false, "Support for container name as domain (name.image.<domain> as container name)")
 
 	var showVersion bool
 	if len(version) > 0 {
