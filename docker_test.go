@@ -122,3 +122,24 @@ func TestOverrideFromDockerComposeName(t *testing.T) {
 		}
 	}
 }
+
+func TestOverrideFromNamedDomain(t *testing.T) {
+	inputs := []struct{
+		input, domain, name, image string
+	}{
+		{"bar.foo.vm", "vm", "bar", "foo"},
+		{"bar.foo.baz.vm", "baz.vm", "bar", "foo"},
+	}
+	getService := func(name string) *Service {
+		service := NewService()
+		service.Name = name
+		return service
+	}
+	for _, input := range inputs {
+		t.Log(input.input)
+		s := getService(input.input)
+		if actual := overrideFromNamedDomain(s, input.domain); actual.Name != input.name || actual.Image != input.image {
+			t.Error(input.input, "Expected:", input.name, input.image, "Got:", actual.Name, actual.Image)
+		}
+	}
+}

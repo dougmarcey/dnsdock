@@ -76,6 +76,9 @@ func (d *DockerManager) getService(id string) (*Service, error) {
 	if d.config.dockerCompose == true {
 		service = overrideFromDockerComposeName(service)
 	}
+	if d.config.namedDomain == true {
+		service = overrideFromNamedDomain(service, d.domain.String())
+	}
 	service = overrideFromEnv(service, splitEnv(inspect.Config.Env))
 	if service == nil {
 		return nil, errors.New("Skipping " + id)
@@ -196,6 +199,18 @@ func overrideFromDockerComposeName(in *Service) (out *Service) {
 		if res[3] != "1" {
 			in.Name = strings.Join(res[2:4], "")
 		}
+	}
+	out = in
+	return
+}
+
+func overrideFromNamedDomain(in *Service, domain string) (out *Service) {
+	re := regexp.MustCompile(`^([A-Za-z0-9][A-Za-z0-9-]{0,62}[A-Za-z0-9]?\.)+[A-Za-z]{2,6}$`)
+	if re.MatchString(in.Name) == true && strings.HasSuffix(in.Name, domain) == true {
+		namedDomain := in.Name[:len(in.Name) - len(domain) - 1]
+		parts := strings.Split(namedDomain, ".")
+		in.Name = parts[0]
+		in.Image = strings.Join(parts[1:],".")
 	}
 	out = in
 	return
